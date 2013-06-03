@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="channels">
+    <item>NASA</item>
+    <item>A Sports channel</item>
+    <item>Other Sports channel</item>
+    <item>Fight Channel</item>
+    <item>RTL</item>
+    <item>Local File</item>
+    </string-array>
+    
+    <string-array name="urls">
+    <item>http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8</item>
+    <item>http://212.226.124.236/mtv3/smil:DR40.smil/chunklist.m3u8</item>
+    <item>http://5.79.65.209:1935/base/jsc_3.stream/playlisy.m3u8</item>
+    <item>http://spiinternational-i.akamaihd.net/hls/live/204308/FIGHTBOXHD_MT_HLS/once1200.m3u8</item>
+    <item>http://webtv-aarh-8.stofa.dk:80/187_01.m3u8</item>
+    <item>C:\Users\Public\Videos\Sample Videos\Wildlife.wmv</item>
+    </string-array>
+  
+</resources>
