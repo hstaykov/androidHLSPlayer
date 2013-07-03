@@ -30,9 +30,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="114dp"
         android:text="OK" />
-    
-    
-     <Button
+
+    <Button
         android:id="@+id/buttonAdd"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
@@ -40,5 +39,22 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="114dp"
         android:text="Add channel" />
+
+    <Button
+        android:id="@+id/buttonEdit"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/buttonAdd"
+        android:layout_alignLeft="@+id/buttonAdd"
+        android:layout_marginBottom="55dp"
+        android:text="Edit channel" />
+
+    <Button
+        android:id="@+id/buttonDelete"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonEdit"
+        android:layout_alignLeft="@+id/buttonEdit"
+        android:text="Delete channel" />
 
 </RelativeLayout>

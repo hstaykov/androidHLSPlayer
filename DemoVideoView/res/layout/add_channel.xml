@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="Name"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
+
     <EditText
         android:id="@+id/tbName"
         android:layout_width="wrap_content"
@@ -20,15 +20,14 @@
 
         <requestFocus />
     </EditText>
-    
-    
+
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="URL"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
+
     <EditText
         android:id="@+id/tbUrl"
         android:layout_width="wrap_content"
@@ -37,7 +36,7 @@
 
         <requestFocus />
     </EditText>
-
+
     <Button
         android:id="@+id/buttonSubmit"
         android:layout_width="176dp"

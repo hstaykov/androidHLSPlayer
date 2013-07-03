@@ -1,7 +1,5 @@
 package com.example.demovideoview;
 
-import android.content.res.Resources;
-
 public class TVChannel {
 	private int channelNumber;
 	private String channelName;
@@ -20,11 +18,7 @@ public class TVChannel {
 	public int getNumber(){
 		return this.channelNumber;
 	}
-	
-//	public void setNumber(int num){
-//		this.channelNumber = num;
-//	}
-//	
+
 	
 	public String getName(){
 		return this.channelName;

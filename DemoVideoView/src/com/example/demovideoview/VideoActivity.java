@@ -9,12 +9,9 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.prefs.Preferences;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -22,21 +19,18 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -46,20 +40,6 @@ import android.widget.VideoView;
 
 public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
 
-	// String SrcPath =
-	// "rtsp://202.146.92.42/ANIMAXVOD/Lunar_Legend_Ep2_4_114.3gp"; //?
-	// String SrcPath = "http://192.168.1.95/stream/first/fileSequence0.ts"; //
-	// 1 files ok
-	// String SrcPath = "http://192.168.1.95/stream/second/prog_index.m3u8"; //
-	// local ok
-	// String SrcPath =
-	// "http://192.168.1.152/testhls/rakutenfiles/C01MPM0001-C01S01N00000461-0400.m3u8";
-	// //rakuten ok
-
-	//String SrcPath = "http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8"; // pachinko
-																						// ok
-	// hami																					// for
-																						// local
 
 	private static final String TAG = "VideoViewDemo";
 
@@ -67,11 +47,9 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	protected VideoView mVideoView;
 	protected FrameLayout mFrameLayout;
 	protected ImageButton mPlay;
-	// private ImageButton mPause;
 	protected ImageButton mFullScreen;
 	protected ImageButton mStop;
 	protected String mCurrent;
-	private ImageView mLoadingScreenImageView;
 	private LinearLayout mControlsLinearLayout;
 	protected ProgressBar mProgressBar;
 	protected boolean mIsIntroVideo;
@@ -85,10 +63,9 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	private boolean mIsPrefetched;
 
 	private TextView mCurrentDuration;
-	private TextView mTotalDuration;
+	private TextView mChannelName;
 	private long mLastPOosition = -1;
 	private long mCurrentPosition = -1;
-	private int mTestSecondaryProgress = 0;
 	private int mLagCount = 0;
 	
 	private int mCurrentState = STATE_IDLE;
@@ -108,39 +85,40 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		try{
 		super.onCreate(savedInstanceState);
 		 requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
 	                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	        
 	    isFullscreen = false;
-	//    currentChannel = new TVChannel(user_channel, "NASA", "http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8");
-
-	    DBAdapter db = new DBAdapter(this);
-//	    db.addChannel(currentChannel);
-	    List<TVChannel> chanls = db.getChannels();
-	    Log.d("DB TEST", chanls.get(0).getName());
-
+	    
 		setContentView(R.layout.video);
+		DBAdapter db = new DBAdapter(this);
+	//	db.deleteAll();
+		// A very stupid workaround...
+		if(db.getChannels().size() == 0);
+		fillWithTestData();
+		
+		Log.d("Filled", "All In");
+		showChannelsNames();
 		updateFromPrefs();
-				
+		
+		
 		mVideoView = (VideoView) findViewById(R.id.video_view);
 		mDuration = -1;
 
 		mProgressBar = (ProgressBar) findViewById(R.id.progressbar_video);
-		// mLoadingScreenImageView =
-		// (ImageView)findViewById(R.id.iv_loading_screen);
+
 		mControlsLinearLayout = (LinearLayout) findViewById(R.id.linearLayout1);
 		mFrameLayout = (FrameLayout) findViewById(R.id.videoframelayout);
 		mCurrentDuration = (TextView) findViewById(R.id.tvCurrentDuration);
-		mTotalDuration = (TextView) findViewById(R.id.tvTotalDuration);
+		mChannelName = (TextView) findViewById(R.id.tvChannelName);
 
-		// loadingScreenImageView.setVisibility(View.GONE);
-		// mProgressBar.setVisibility(View.VISIBLE);
-		mProgressBar.setVisibility(View.GONE);
+		
 		mCurrentDuration.setText("00:00");
-		mTotalDuration.setText(currentChannel.getName());
-		mTotalDuration.setTextColor(Color.RED);
+		mChannelName.setText(currentChannel.getName());
+		mChannelName.setTextColor(Color.RED);
 
 		mControlsLinearLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.alpha));
 
@@ -171,7 +149,6 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 			}
 		});
 
-		// mVideoView.setO
 		mPlay.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 
@@ -195,17 +172,13 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 			}
 
 			private void makeFullscreen() {
-//				 Log.d(TAG,"Making video fullscreen ");
-//				 DisplayMetrics metrics = new DisplayMetrics(); getWindowManager().getDefaultDisplay().getMetrics(metrics);
-//				 ViewGroup.LayoutParams params = ( ViewGroup.LayoutParams) mVideoView.getLayoutParams();
-//	             params.width =  metrics.widthPixels;
-//	             params.height = metrics.heightPixels;
-//	             mVideoView.setLayoutParams(params);
-	             mSeekBar.setVisibility(View.INVISIBLE);
-	             mPlay.setVisibility(View.INVISIBLE);
-	             mStop.setVisibility(View.INVISIBLE);
+	             mSeekBar.setVisibility(View.GONE);
+	             mPlay.setVisibility(View.GONE);
+	             mStop.setVisibility(View.GONE);
 	             isFullscreen = true;
-	             mFullScreen.setVisibility(View.INVISIBLE);
+	             mFullScreen.setVisibility(View.GONE);
+	             mCurrentDuration.setVisibility(View.GONE);
+	             mChannelName.setVisibility(View.GONE);
 			}
 		});
 
@@ -213,7 +186,9 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 			public void onClick(View view) {
 				if (mVideoView != null) {
 					mCurrent = null;
-					//mVideoView.stopPlayback();
+					mVideoView.stopPlayback();
+					mPlay.setImageDrawable(playDrawable);
+					mCurrentState = STATE_IDLE;
 					onSeekForward(mSeekBar, 10000);
 				}
 			}
@@ -332,7 +307,7 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 							if (mLastPOosition == mCurrentPosition) {
 								if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE) {
 									mProgressBar.setVisibility(View.VISIBLE);
-									mTotalDuration.setText(currentChannel.getName());
+									mChannelName.setText(currentChannel.getName());
 									Log.e("lag", "Lag at :" + TimeFormat.milisecondToHMS(mCurrentPosition) + " " + mLagCount++ + " times");
 								}
 								mCurrentDuration.setTextColor(Color.RED);
@@ -354,6 +329,11 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 		
 		timerForLoading.scheduleAtFixedRate(timerTaskForLoading, 500, 1000);
 
+	
+	}
+	catch(Exception e){
+		Toast.makeText(VideoActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+	}
 	}
 
 	private void playVideo() {
@@ -441,8 +421,6 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub
-		// if(Constants.LOG)Log.d("In Activity touch listenr"," controlsLinearLayout.getVisibility() : "+controlsLinearLayout.getVisibility()
-		// );
 		
 		Log.d(TAG, "We toucheed the screen..");
 		
@@ -453,6 +431,8 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
              mPlay.setVisibility(View.VISIBLE);
              mStop.setVisibility(View.VISIBLE);
              mFullScreen.setVisibility(View.VISIBLE);
+             mCurrentDuration.setVisibility(View.VISIBLE);
+             mChannelName.setVisibility(View.VISIBLE);
              isFullscreen = false;
 		}
 		
@@ -534,30 +514,13 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 		}
 	}
 
-	/*
-	 * protected void startPlaying(String URL) { // TODO Auto-generated method
-	 * stub SrcPath = URL;
-	 * 
-	 * runOnUiThread(new Runnable() { public void run() { playVideo();
-	 * 
-	 * }o
-	 * 
-	 * });
-	 * 
-	 * }
-	 */
-	
 	private void updateFromPrefs(){
     	SharedPreferences prefs = getSharedPreferences(PreferencesActivity.USER_PREFS, Activity.MODE_PRIVATE);
         user_channel = prefs.getInt(PreferencesActivity.USER_CHANNEL, 1);
-        Resources r = getResources();
-        String[] names = r.getStringArray(R.array.channels);
-        String[] urls = r.getStringArray(R.array.urls);
-        
-        currentChannel = new TVChannel(user_channel, names[user_channel], urls[user_channel]);
+        DBAdapter db = new DBAdapter(this);
+        currentChannel = db.getChannelById(user_channel+1);        
+        Log.d("Getting the channel", currentChannel.getName() + " ; " + currentChannel.getURL());
         playVideo();
-        
-    	Log.d("Current channel",  String.valueOf(user_channel));
     }
 	
 	@Override
@@ -603,10 +566,23 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	private void fillWithTestData(){
 		DBAdapter db = new DBAdapter(this);
 		db.addChannel(new TVChannel(0, "NASA", "http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8" ));
-		db.addChannel(new TVChannel(0, "A Sports channel", "http://212.226.124.236/mtv3/smil:DR40.smil/chunklist.m3u8" ));
-		db.addChannel(new TVChannel(0, "Other Sports channel", "http://5.79.65.209:1935/base/jsc_3.stream/playlisy.m3u8" ));
+//		db.addChannel(new TVChannel(0, "A Sports channel", "http://212.226.124.236/mtv3/smil:DR40.smil/chunklist.m3u8" ));
+//		db.addChannel(new TVChannel(0, "Other Sports channel", "http://5.79.65.209:1935/base/jsc_3.stream/playlisy.m3u8" ));
 		db.addChannel(new TVChannel(0, "Fight Channel", "http://spiinternational-i.akamaihd.net/hls/live/204308/FIGHTBOXHD_MT_HLS/once1200.m3u8" ));
 		db.addChannel(new TVChannel(0, "RTL", "http://webtv-aarh-8.stofa.dk:80/187_01.m3u8" ));
+		db.addChannel(new TVChannel(0, "Big Bunny file", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ));
+//		db.addChannel(new TVChannel(0, "Euro Sport", "rtmp://109.163.226.87/pull?testkey=3ece383457277526800eb94beffc859e/gba3emj" ));
+		db.addChannel(new TVChannel(0, "Megalan NG", "http://iptv.megalan.bg/?plgen&type=m3u" ));
+		db.addChannel(new TVChannel(0, "Video from pc", "http://192.168.0.104:8080" ));
+		db.close();
+	}
+	
+	private void showChannelsNames(){
+		  DBAdapter db = new DBAdapter(this);
+		    List<TVChannel> chanls = db.getChannels();
+		    for(TVChannel s : chanls){
+		    	Log.d("Prefs Check", s.getNumber() + " ; " + s.getName() + " ; " + s.getURL());
+		    }
 	}
 
 }

@@ -61,16 +61,16 @@
         android:id="@+id/tvCurrentDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:text="0:00:00" 
+        android:layout_gravity="top|left"
+        android:text="0:00:00"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/tvTotalDuration"
+        android:id="@+id/tvChannelName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:text="0:00:00"
+        android:layout_gravity="top|right"
+        android:text="Channel"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </FrameLayout>

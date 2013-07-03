@@ -92,6 +92,25 @@ public class DBAdapter extends SQLiteOpenHelper {
 		return channels;
 	}
 	
+	public TVChannel getChannelById(int id){
+		String select = "SELECT * FROM " + TABLE_CHANNELS + " WHERE " + KEY_ID + " = " + id;		
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery(select, null);
+		TVChannel ch = null ;
+		if(cursor.moveToFirst()){
+			do{
+				int num = Integer.parseInt(cursor.getString(0));
+				String name = cursor.getString(1);
+				String url = cursor.getString(2);
+				ch = new TVChannel(num, name, url);
+			
+			}
+			while(cursor.moveToNext());
+		}
+		return ch;
+		
+	}
+	
 	
 	public List<String> getChannelsNames(){
 		List<String> channelsNames = new ArrayList<String>();
@@ -118,8 +137,23 @@ public class DBAdapter extends SQLiteOpenHelper {
 	
 	public void deleteAll(){
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.delete(TABLE_CHANNELS, null, null);
+//		db.delete(TABLE_CHANNELS, null, null);
+		String delete = "DELETE FROM " + TABLE_CHANNELS;
+		db.execSQL(delete);
 		db.close();
+	}
+	
+	public int editChannel(TVChannel ch){
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(KEY_NAME, ch.getName());
+		values.put(KEY_URL, ch.getURL());
+		return db.update(TABLE_CHANNELS, values, KEY_ID + " = ?", new String[] {String.valueOf(ch.getNumber())});
+		
+//		String update = "UPDATE " + TABLE_CHANNELS + " SET " + KEY_NAME + " = " + ch.getName() + " , " + KEY_URL + " = "
+//		+ ch.getURL() + " WHERE id= " + ch.getNumber();
+//		db.execSQL(update);
+//		db.close();
 	}
 	
 
