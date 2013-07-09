@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import com.example.IptvPlayer.R;
 
 public class PreferencesActivity extends Activity {
 public static final String USER_CHANNEL = "USER_CHANNEL";
@@ -27,23 +29,15 @@ Spinner channelSpinner;
         setContentView(R.layout.ac_preferences);
         
       
-        final DBAdapter db = new DBAdapter(this);
-	    List<String> chanls = db.getChannelsNames();
-        
-	    for(String s : chanls){
-	    	Log.d("Prefs Check", s);
-	    
-	    }
-        
+      
         channelSpinner = (Spinner)findViewById(R.id.spinner1);
+        
         ArrayAdapter<String> fAdapter;
-        fAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, chanls);
-        fAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        channelSpinner.setAdapter(fAdapter);
+        final DBAdapter db = updateSpinner();
         
         prefs = getSharedPreferences(USER_PREFS, Activity.MODE_PRIVATE);
         int channel = prefs.getInt(USER_CHANNEL, 1);
-        channelSpinner.setSelection(channel);
+        //channelSpinner.setSelection(channel - 1);
         
         Log.d("A tag", "We are before button");
         Button okButton = (Button)findViewById(R.id.buttonOK);
@@ -74,10 +68,10 @@ Spinner channelSpinner;
 			@Override
 			public void onClick(View v) {
 				
-				final int user_channel_number = channelSpinner.getSelectedItemPosition();
-				TVChannel selectedChannel = getChannelById(user_channel_number + 1);
+				TVChannel selectedChannel = getChannelByName(channelSpinner.getSelectedItem().toString());
 				db.deleteChannel(selectedChannel);
 				db.close();
+				updateSpinner();
 			}
 		});
         
@@ -95,6 +89,18 @@ Spinner channelSpinner;
         	Log.d("A tag", "Something went wrong..." + e.getMessage());
         }
     }
+
+
+
+	private DBAdapter updateSpinner() {
+		ArrayAdapter<String> fAdapter;
+		final DBAdapter db = new DBAdapter(this);
+	    List<String> chanls = db.getChannelsNames();
+        fAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, chanls);
+        fAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        channelSpinner.setAdapter(fAdapter);
+		return db;
+	}
    
     
     
@@ -118,6 +124,13 @@ Spinner channelSpinner;
     	return tv;
     }
     
+    private TVChannel getChannelByName(String name){
+    	DBAdapter db = new DBAdapter(this);
+    	TVChannel tv = db.getChannelByName(name);
+    	db.close();
+    	return tv;
+    }
+    
     private void addChannel(){
     	// custom dialog
 		final Dialog dialog = new Dialog(this);
@@ -136,6 +149,7 @@ Spinner channelSpinner;
 					String url = mUrl.getText().toString();
 					TVChannel tvc = new TVChannel(0, name, url);	
 					addChToDB(tvc);
+					updateSpinner();
 					dialog.dismiss();
 				}
 			});
@@ -144,14 +158,14 @@ Spinner channelSpinner;
     
     private void editChannel(){
     	// custom dialog
-     	final int user_channel_number = channelSpinner.getSelectedItemPosition();
+   
 		final Dialog dialog = new Dialog(this);
 		dialog.setContentView(R.layout.add_channel);
 		dialog.setTitle("Add channel");
 		
 		final EditText mName = (EditText)dialog.findViewById(R.id.tbName);
 		final EditText mUrl = (EditText)dialog.findViewById(R.id.tbUrl);
-		TVChannel selectedChannel = getChannelById(user_channel_number + 1);
+		final TVChannel selectedChannel = getChannelByName(channelSpinner.getSelectedItem().toString());
 		mName.setText(selectedChannel.getName());
 		mUrl.setText(selectedChannel.getURL());
 		
@@ -160,11 +174,11 @@ Spinner channelSpinner;
 		mButtonSubmit.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					// TODO Auto-generated method stub
 					String name = mName.getText().toString();
 					String url = mUrl.getText().toString();
-					TVChannel tvc = new TVChannel(user_channel_number + 1, name, url);	
+					TVChannel tvc = new TVChannel(selectedChannel.getNumber(), name, url);	
 					editChToDB(tvc);
+					updateSpinner();
 					dialog.dismiss();
 				}
 			});
@@ -172,7 +186,8 @@ Spinner channelSpinner;
     }
     
     private void savePreferences(){
-    	int user_channel_number = channelSpinner.getSelectedItemPosition();
+    	Object userChannelName = channelSpinner.getSelectedItem();
+    	int user_channel_number  = getChannelByName(userChannelName.toString()).getNumber();
     	Editor edit = prefs.edit();
     	edit.putInt(USER_CHANNEL, user_channel_number);
     	edit.commit();

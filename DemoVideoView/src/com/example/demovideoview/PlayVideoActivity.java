@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import com.example.IptvPlayer.R;
 
 public class PlayVideoActivity extends VideoActivity {
 

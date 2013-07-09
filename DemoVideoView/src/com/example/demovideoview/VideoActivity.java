@@ -37,6 +37,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+import com.example.IptvPlayer.R;
 
 public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
 
@@ -95,11 +96,10 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	    
 		setContentView(R.layout.video);
 		DBAdapter db = new DBAdapter(this);
-	//	db.deleteAll();
-		// A very stupid workaround...
-		if(db.getChannels().size() == 0);
-		fillWithTestData();
-		
+		int x = db.getChannels().size();
+		if( x == 0){
+			fillWithTestData();
+		}
 		Log.d("Filled", "All In");
 		showChannelsNames();
 		updateFromPrefs();
@@ -362,6 +362,8 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 				mVideoView.setVideoURI(Uri.parse(path));
 
 				// mVideoView.setVideoPath(getDataSource(path));
+				final Drawable playDrawable = getResources().getDrawable(R.drawable.play);
+				mPlay.setImageDrawable(playDrawable);
 				mVideoView.start();
 				mVideoView.requestFocus();
 				mCurrentState = STATE_PLAYING;
@@ -518,7 +520,7 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
     	SharedPreferences prefs = getSharedPreferences(PreferencesActivity.USER_PREFS, Activity.MODE_PRIVATE);
         user_channel = prefs.getInt(PreferencesActivity.USER_CHANNEL, 1);
         DBAdapter db = new DBAdapter(this);
-        currentChannel = db.getChannelById(user_channel+1);        
+        currentChannel = db.getChannelById(user_channel);        
         Log.d("Getting the channel", currentChannel.getName() + " ; " + currentChannel.getURL());
         playVideo();
     }

@@ -1,5 +1,7 @@
 package com.example.demovideoview;
 
+import com.example.IptvPlayer.R;
+
 public class TVChannel {
 	private int channelNumber;
 	private String channelName;

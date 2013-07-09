@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import com.example.IptvPlayer.R;
 
 public class DBAdapter extends SQLiteOpenHelper {
 
@@ -108,6 +109,26 @@ public class DBAdapter extends SQLiteOpenHelper {
 			while(cursor.moveToNext());
 		}
 		return ch;
+	}
+	
+	
+	
+
+	public TVChannel getChannelByName(String name){
+		String select = "SELECT * FROM " + TABLE_CHANNELS + " WHERE " + KEY_NAME + " = ?; ";	
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery(select, new String[] {name});
+		TVChannel ch = null ;
+		if(cursor.moveToFirst()){
+			do{
+				int num = Integer.parseInt(cursor.getString(0));
+				String returnedNamename = cursor.getString(1);
+				String url = cursor.getString(2);
+				ch = new TVChannel(num, returnedNamename, url);
+			}
+			while(cursor.moveToNext());
+		}
+		return ch;
 		
 	}
 	
@@ -137,7 +158,6 @@ public class DBAdapter extends SQLiteOpenHelper {
 	
 	public void deleteAll(){
 		SQLiteDatabase db = this.getWritableDatabase();
-//		db.delete(TABLE_CHANNELS, null, null);
 		String delete = "DELETE FROM " + TABLE_CHANNELS;
 		db.execSQL(delete);
 		db.close();

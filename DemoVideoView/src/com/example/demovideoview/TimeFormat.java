@@ -1,5 +1,6 @@
 package com.example.demovideoview;
 
+import com.example.IptvPlayer.R;
 import java.util.concurrent.TimeUnit;
 
 public class TimeFormat {
