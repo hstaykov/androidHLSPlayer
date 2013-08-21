@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
+
 import com.example.IptvPlayer.R;
 
 public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeListener {
@@ -96,7 +98,8 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	    
 		setContentView(R.layout.video);
 		DBAdapter db = new DBAdapter(this);
-		int x = db.getChannels().size();
+		int x = ((IPTVApplication)getApplication()).getChannelsDB().getChannels().size();
+		 
 		if( x == 0){
 			fillWithTestData();
 		}
@@ -133,7 +136,7 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 		mVideoView.setOnPreparedListener(new OnPreparedListener() {
 
 			public void onPrepared(MediaPlayer mp) {
-				// TODO Auto-generated method stub
+			
 				Log.d("onPrepared", "mp.getDuration() : " + mp.getDuration());
 				mIsPrefetched = true;
 				// loadingScreenImageView.setVisibility(View.GONE);
@@ -144,7 +147,7 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 			
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				// TODO Auto-generated method stub
+			
 				mCurrentState = STATE_PLAYBACK_COMPLETED;
 			}
 		});
@@ -200,11 +203,11 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 		mTimerTask = new TimerTask() {
 
 			public void run() {
-				// TODO Auto-generated method stub
+				
 				runOnUiThread(new Runnable() {
 
 					public void run() {
-						// TODO Auto-generated method stub
+					
 						if (mVideoView != null) {
 							mDuration = mVideoView.getDuration();
 
@@ -241,12 +244,12 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
+				
 				runOnUiThread(new Runnable() {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
+					
 						if (mVideoView != null) {
 							// if(Constants.LOG)Log.d(" mVideoView.getDuration() : "+
 							// mVideoView.getDuration(),
@@ -421,11 +424,8 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	boolean mIsTouchedOnceAgain = false;
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		// TODO Auto-generated method stub
-		
+	public boolean onTouchEvent(MotionEvent event) {		
 		Log.d(TAG, "We toucheed the screen..");
-		
 		
 		if(isFullscreen){
 			 Log.d(TAG, "Showing buttons");
@@ -456,7 +456,6 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	}
 
 	private void setVisibilityOfControls(int visibility) {
-		// TODO Auto-generated method stub
 		mSeekBar.setVisibility(visibility);
 		mControlsLinearLayout.setVisibility(visibility);
 		mPlay.setVisibility(visibility);
@@ -482,7 +481,6 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	}
 
 	public void onStopTrackingTouch(SeekBar seekBar) {
-		// TODO Auto-generated method stub
 		int progress = seekBar.getProgress();
 		if (mDuration != 0 && mDuration != -1) {
 			if (mProgressBar != null && mProgressBar.getVisibility() == View.GONE) {
@@ -519,8 +517,7 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 	private void updateFromPrefs(){
     	SharedPreferences prefs = getSharedPreferences(PreferencesActivity.USER_PREFS, Activity.MODE_PRIVATE);
         user_channel = prefs.getInt(PreferencesActivity.USER_CHANNEL, 1);
-        DBAdapter db = new DBAdapter(this);
-        currentChannel = db.getChannelById(user_channel);        
+        currentChannel = ((IPTVApplication)getApplication()).getChannelsDB().getChannelById(user_channel);
         Log.d("Getting the channel", currentChannel.getName() + " ; " + currentChannel.getURL());
         playVideo();
     }
@@ -555,33 +552,27 @@ public class VideoActivity extends Activity implements SeekBar.OnSeekBarChangeLi
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onRestoreInstanceState(savedInstanceState);
 	}
 	
-	private void fillWithTestData(){
-		DBAdapter db = new DBAdapter(this);
-		db.addChannel(new TVChannel(0, "NASA", "http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8" ));
-//		db.addChannel(new TVChannel(0, "A Sports channel", "http://212.226.124.236/mtv3/smil:DR40.smil/chunklist.m3u8" ));
-//		db.addChannel(new TVChannel(0, "Other Sports channel", "http://5.79.65.209:1935/base/jsc_3.stream/playlisy.m3u8" ));
-		db.addChannel(new TVChannel(0, "Fight Channel", "http://spiinternational-i.akamaihd.net/hls/live/204308/FIGHTBOXHD_MT_HLS/once1200.m3u8" ));
-		db.addChannel(new TVChannel(0, "RTL", "http://webtv-aarh-8.stofa.dk:80/187_01.m3u8" ));
-		db.addChannel(new TVChannel(0, "Big Bunny file", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ));
-//		db.addChannel(new TVChannel(0, "Euro Sport", "rtmp://109.163.226.87/pull?testkey=3ece383457277526800eb94beffc859e/gba3emj" ));
-		db.addChannel(new TVChannel(0, "Megalan NG", "http://iptv.megalan.bg/?plgen&type=m3u" ));
-		db.addChannel(new TVChannel(0, "Video from pc", "http://192.168.0.104:8080" ));
-		db.close();
+	private void fillWithTestData() throws Exception{
+	
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "NASA", "http://nasahd-i.akamaihd.net/hls/live/203739/NASATV1_iOS_HD/Edge.m3u8" ));
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "Fight Channel", "http://spiinternational-i.akamaihd.net/hls/live/204308/FIGHTBOXHD_MT_HLS/once1200.m3u8" ));
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "RTL", "http://webtv-aarh-8.stofa.dk:80/187_01.m3u8" ));
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "Big Bunny file", "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ));
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "Megalan NG", "http://iptv.megalan.bg/?plgen&type=m3u" ));
+		((IPTVApplication)getApplication()).getChannelsDB().addChannel(new TVChannel(0, "Video from pc", "http://192.168.0.104:8080" ));
+		
 	}
 	
 	private void showChannelsNames(){
-		  DBAdapter db = new DBAdapter(this);
-		    List<TVChannel> chanls = db.getChannels();
+		    List<TVChannel> chanls = ((IPTVApplication)getApplication()).getChannelsDB().getChannels();
 		    for(TVChannel s : chanls){
 		    	Log.d("Prefs Check", s.getNumber() + " ; " + s.getName() + " ; " + s.getURL());
 		    }

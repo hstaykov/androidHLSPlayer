@@ -1,6 +1,7 @@
 package com.example.demovideoview;
 
 import java.util.List;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.Dialog;
@@ -14,11 +15,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+
 import com.example.IptvPlayer.R;
 
 public class PreferencesActivity extends Activity {
 public static final String USER_CHANNEL = "USER_CHANNEL";
 public static final String USER_PREFS = "USER_PREFS";
+private static final String tag = "PrefsError";
 SharedPreferences prefs;
 Spinner channelSpinner;
 	
@@ -33,7 +36,7 @@ Spinner channelSpinner;
         channelSpinner = (Spinner)findViewById(R.id.spinner1);
         
         ArrayAdapter<String> fAdapter;
-        final DBAdapter db = updateSpinner();
+       
         
         prefs = getSharedPreferences(USER_PREFS, Activity.MODE_PRIVATE);
         int channel = prefs.getInt(USER_CHANNEL, 1);
@@ -69,8 +72,8 @@ Spinner channelSpinner;
 			public void onClick(View v) {
 				
 				TVChannel selectedChannel = getChannelByName(channelSpinner.getSelectedItem().toString());
-				db.deleteChannel(selectedChannel);
-				db.close();
+				((IPTVApplication)getApplication()).getChannelsDB().deleteChannel(selectedChannel);
+				
 				updateSpinner();
 			}
 		});
@@ -92,42 +95,39 @@ Spinner channelSpinner;
 
 
 
-	private DBAdapter updateSpinner() {
+	private void updateSpinner() {
 		ArrayAdapter<String> fAdapter;
-		final DBAdapter db = new DBAdapter(this);
-	    List<String> chanls = db.getChannelsNames();
+	    List<String> chanls = ((IPTVApplication)getApplication()).getChannelsDB().getChannelsNames();	    		
         fAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, chanls);
         fAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelSpinner.setAdapter(fAdapter);
-		return db;
 	}
    
     
     
     private void addChToDB(TVChannel ch){
-    	DBAdapter db = new DBAdapter(this);
-    	db.addChannel(ch);
-    	db.close();
-    	
+    	try {
+			((IPTVApplication)getApplication()).getChannelsDB().addChannel(ch);
+		} catch (Exception e) {
+			Log.wtf(tag, "Problem with adding channel to db" + e.getMessage());
+			
+		}
     }
     
     private void editChToDB(TVChannel ch){
-    	DBAdapter db = new DBAdapter(this);
-    	db.editChannel(ch);
-    	db.close();
+
+    	((IPTVApplication)getApplication()).getChannelsDB().editChannel(ch);
+    	
     }
     
     private TVChannel getChannelById(int id){
-    	DBAdapter db = new DBAdapter(this);
-    	TVChannel tv = db.getChannelById(id);
-    	db.close();
+
+    	TVChannel tv = ((IPTVApplication)getApplication()).getChannelsDB().getChannelById(id);
     	return tv;
     }
     
     private TVChannel getChannelByName(String name){
-    	DBAdapter db = new DBAdapter(this);
-    	TVChannel tv = db.getChannelByName(name);
-    	db.close();
+    	TVChannel tv = ((IPTVApplication)getApplication()).getChannelsDB().getChannelByName(name);
     	return tv;
     }
     
