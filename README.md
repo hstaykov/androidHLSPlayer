@@ -1,4 +1,2 @@
 AndroidHLSPlayer
 ================
-androidHLSPlayer
-================
