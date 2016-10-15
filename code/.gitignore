@@ -1,0 +1,17 @@
+# InteliJ Idea
+*/.idea/workspace.xml
+*/.idea/tasks.xml
+*/.idea/libraries/
+
+# Build folder
+build
+
+# Gradle
+.gradle
+gradle
+gradlew
+gradlew.bat
+local.properties
+
+# Import from eclipse project
+import-summary.txt
